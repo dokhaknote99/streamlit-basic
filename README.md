@@ -1,6 +1,6 @@
 # Streamlit Basic Showcase & AI Chatbot
 
-Streamlit의 다양한 UI 컴포넌트 기능 탐색과 OpenAI API를 연동한 멀티모달 AI 챗봇 프로젝트입니다.
+Streamlit의 다양한 UI 컴포넌트 기능 탐색과 OpenAI API를 연동한 보안 중심 AI 챗봇 시스템 프로젝트입니다.
 
 ---
 
@@ -18,16 +18,23 @@ Streamlit의 다양한 UI 컴포넌트 기능 탐색과 OpenAI API를 연동한 
 - **💬 Chat elements**: Chat Message, Chat Input
 - **🔔 Status elements**: Alerts, Progress, Spinner, Status, Toast, Balloons 등
 
-### 2. OpenAI 멀티모달 챗봇 & 대화 히스토리 시스템 (`app2.py`)
-Streamlit의 공식 멀티페이지 네비게이션(`st.navigation`)을 기반으로 구성되었습니다:
-- **💬 AI 챗봇 대화 (`app2_chat.py`)**:
+### 2. OpenAI AI 챗봇 시스템 (`app2.py`)
+Streamlit의 공식 멀티페이지 네비게이션(`st.navigation`)을 기반으로 구성된 보안 강화 챗봇 시스템입니다:
+- **👤 사용자 로그인 (`pages_app2/auth.py`)**:
+  - 사용자 ID 기반 로그인으로 유저별 대화 세션 및 히스토리 완전 격리
+  - 로그아웃 시 메모리 내 API Key 및 세션 데이터 즉시 영구 파기
+- **🔑 API Key 등록 및 보안 안내 (`pages_app2/key_settings.py`)**:
+  - **DB 절대 미저장 원칙**: 세션 메모리(`st.session_state`)에만 일시 보관
+  - 보안 취약점 및 공용 PC 사용 주의사항 상세 안내
+  - 등록된 Key 메모리에서 즉시 삭제 기능
+- **💬 순수 텍스트 챗봇 (`pages_app2/chat.py`)**:
+  - 불필요한 이미지/파일 업로드를 배제하고 텍스트 대화에만 집중
   - 기본 모델: `gpt-5.6-luna` (GPT 5.5+ 모델 선택 지원)
-  - 🖼️ 이미지 업로드: 모달 팝업창(`@st.dialog`)에서 드래그 앤 드롭으로 이미지 첨부 및 Vision 분석
-  - 📁 파일 업로드: 코드 및 문서 파일 첨부 시 컨텍스트 자동 주입
-  - 실시간 타이핑 스트리밍 응답 (`st.write_stream`)
-  - 대화 세션 분리 및 SQLite 영구 저장
-- **📜 과거 대화 내역 뷰어 (`app2_history.py`)**:
-  - SQLite(`chat_history.db`)에 저장된 모든 대화 세션 목록 조회 및 실시간 검색
+  - 실시간 타이핑 스트리밍 답변 (`st.write_stream`)
+  - **세션당 100회 대화(200개 메시지) FIFO 자동 관리**: 초과 시 오래된 메시지 자동 삭제
+  - **유저당 최대 10개 세션 FIFO 자동 관리**: 10개 초과 시 오래된 세션 자동 삭제
+- **📜 과거 대화 내역 뷰어 (`pages_app2/history.py`)**:
+  - 로그인한 사용자의 대화 기록(최대 10개 세션) 조회 및 실시간 검색
   - 대화형 메시지 뷰(`st.chat_message`) 및 데이터 테이블 뷰(`st.dataframe`)
   - 대화 내역 텍스트(.txt) 및 CSV(.csv) 다운로드 지원
 
@@ -42,14 +49,7 @@ Streamlit의 공식 멀티페이지 네비게이션(`st.navigation`)을 기반�
 uv sync
 ```
 
-### 2. 환경변수 설정
-프로젝트 루트의 `.env` 파일에 OpenAI API Key를 설정합니다:
-
-```env
-OPENAI_API_KEY=your_openai_api_key_here
-```
-
-### 3. 앱 실행
+### 2. 앱 실행
 
 - **Page Elements 종합 쇼케이스 실행**:
   ```powershell
