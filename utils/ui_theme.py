@@ -60,6 +60,24 @@ def apply_custom_theme():
             max-width: 1060px;
         }}
 
+        /* 상단 네비게이션 메뉴 가운데 정렬 */
+        [data-testid="stHeader"] nav {{
+            justify-content: center !important;
+        }}
+        [data-testid="stHeader"] [data-testid="stHeaderActionElements"] {{
+            justify-content: center !important;
+        }}
+        .stAppHeader nav {{
+            justify-content: center !important;
+        }}
+
+        /* 채팅 입력창 너비를 block-container와 동일하게 제한 */
+        [data-testid="stChatInput"] {{
+            max-width: 1060px !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }}
+
         /* 컨테이너 및 폼 라이트 글래스 반투명 효과 */
         div[data-testid="stVerticalBlockBorderWrapper"],
         div[data-testid="stForm"] {{
