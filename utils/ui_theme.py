@@ -33,7 +33,9 @@ def apply_custom_theme():
             background-attachment: fixed !important;
         }}
         [data-testid="stHeader"] {{
-            background-color: transparent !important;
+            background-color: rgba(15, 23, 42, 0.75) !important;
+            backdrop-filter: blur(12px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
         }}
         [data-testid="stSidebar"] {{
             background-color: rgba(15, 23, 42, 0.75) !important;

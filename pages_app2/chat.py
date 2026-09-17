@@ -16,11 +16,12 @@ apply_custom_theme()
 user_id = st.session_state.get("user_id", "guest")
 api_key = st.session_state.get("openai_api_key", "")
 
-# 1. API Key 등록 확인
+# 1. API Key 등록 검증
 if not api_key:
     st.title("💬 채팅")
     st.warning("OpenAI API Key가 등록되지 않았습니다.")
-    st.info("좌측 메뉴의 **[API Key 등록]** 페이지에서 먼저 Key를 등록해주세요.")
+    if st.button("🔑 API Key 등록하러 가기", type="primary"):
+        st.switch_page("pages_app2/key_settings.py")
     st.stop()
 
 # 2. 세션 초기화
@@ -37,8 +38,10 @@ current_sid = st.session_state.current_session_id
 current_session_info = next((s for s in user_sessions if s[0] == current_sid), None)
 current_title = current_session_info[1] if current_session_info else "대화"
 
-# 3. 사이드바: 새 대화, 모델 선택, 세션 선택
+# 3. 사이드바: 오직 채팅 페이지 고유 옵션만 배치
 with st.sidebar:
+    st.subheader("💬 채팅 옵션")
+
     if st.button("➕ 새 대화", use_container_width=True, type="primary"):
         new_sid = create_session(user_id, "새 대화")
         st.session_state.current_session_id = new_sid
@@ -56,14 +59,14 @@ with st.sidebar:
 
     st.divider()
 
-    # 세션 목록
+    # 대화 세션 목록
     if user_sessions:
         session_ids = [s[0] for s in user_sessions]
         session_labels = {s[0]: s[1] for s in user_sessions}
         curr_idx = session_ids.index(current_sid) if current_sid in session_ids else 0
 
         chosen_session = st.selectbox(
-            "대화 목록",
+            "대화 세션 선택",
             options=session_ids,
             index=curr_idx,
             format_func=lambda sid: session_labels[sid],
@@ -85,8 +88,12 @@ with st.sidebar:
         st.session_state.current_session_id = new_sid
         st.rerun()
 
-# 4. 메인 화면
-st.title(f"💬 {current_title}")
+# 4. 메인 채팅 화면 헤더 레이아웃
+col_head, col_meta = st.columns([3, 1])
+with col_head:
+    st.title(f"💬 {current_title}")
+with col_meta:
+    st.caption(f"적용 모델: **{selected_model}**")
 
 current_messages = load_session_messages(current_sid)
 
