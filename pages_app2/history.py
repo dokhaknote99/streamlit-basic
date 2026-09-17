@@ -16,7 +16,13 @@ st.title("📜 과거 대화 내역")
 sessions = get_user_sessions(user_id)
 
 if not sessions:
-    st.info("저장된 대화 내역이 없습니다.")
+    st.markdown("<div style='height: 30px;'></div>", unsafe_allow_html=True)
+    _, col_empty, _ = st.columns([1, 1.2, 1])
+    with col_empty:
+        st.image("assets/logo.jpg", width=80)
+        st.info("아직 저장된 대화 내역이 없습니다.")
+        if st.button("💬 지금 대화 시작하기", use_container_width=True, type="primary"):
+            st.switch_page("pages_app2/chat.py")
     st.stop()
 
 # 1. 사이드바: 오직 대화 목록 탐색 및 세션 삭제 옵션만 배치
@@ -52,10 +58,11 @@ with tab_chat:
     if df_msgs.empty:
         st.info("저장된 메시지가 없습니다.")
     else:
-        for _, row in df_msgs.iterrows():
-            with st.chat_message(row["role"]):
-                st.write(row["content"])
-                st.caption(f"🕒 {row['created_at']}")
+        with st.container(height=480, border=True):
+            for _, row in df_msgs.iterrows():
+                with st.chat_message(row["role"]):
+                    st.write(row["content"])
+                    st.caption(f"🕒 {row['created_at']}")
 
         st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
         chat_text = "\n\n".join([f"[{r['role'].upper()}] ({r['created_at']})\n{r['content']}" for _, r in df_msgs.iterrows()])
@@ -69,7 +76,7 @@ with tab_chat:
 
 with tab_table:
     if not df_msgs.empty:
-        st.dataframe(df_msgs, width="stretch")
+        st.dataframe(df_msgs, width="stretch", height=480)
         csv_data = df_msgs.to_csv(index=False).encode("utf-8-sig")
         st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
         st.download_button(

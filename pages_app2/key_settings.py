@@ -40,6 +40,7 @@ with col_form:
                     st.warning("유효한 API Key를 입력해주세요.")
 
 with col_guide:
+    st.image("assets/security_key.jpg", width="stretch")
     with st.container(border=True):
         st.subheader("⚠️ 보안 안내 및 주의사항")
         st.markdown("""

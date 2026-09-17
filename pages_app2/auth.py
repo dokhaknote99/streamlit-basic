@@ -10,8 +10,8 @@ if not current_user:
     col_intro, col_form = st.columns([1, 1], gap="large")
 
     with col_intro:
-        st.write("아이디를 입력하고 나만의 대화 공간을 시작하세요.")
-        st.info("입력하신 사용자 ID를 기준으로 모든 대화 세션과 기록이 독립적으로 격리 보관됩니다.")
+        st.image("assets/auth_hero.jpg", width="stretch")
+        st.caption("AI Assistant와 함께 개인화된 대화 세션과 스마트한 작업을 경험해보세요.")
 
     with col_form:
         with st.container(border=True):
@@ -32,6 +32,7 @@ else:
     col_info, col_nav = st.columns([1, 1], gap="large")
 
     with col_info:
+        st.image("assets/auth_hero.jpg", width="stretch")
         with st.container(border=True):
             st.subheader("접속 상태")
             st.write(f"로그인 계정: **{current_user}**")

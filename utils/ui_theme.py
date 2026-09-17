@@ -5,7 +5,7 @@ import streamlit as st
 @st.cache_data
 def get_background_base64():
     """
-    assets/background.jpg 이미지를 읽어 base64로 인코딩합니다.
+    assets/background.jpg(밝은 계열 배경 이미지)를 읽어 base64로 인코딩합니다.
     """
     image_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "background.jpg")
     if os.path.exists(image_path):
@@ -15,8 +15,7 @@ def get_background_base64():
 
 def apply_custom_theme():
     """
-    배경 이미지를 가림 없이 그대로 노출하고,
-    불필요한 장식을 배제한 깔끔한 UI 스타일을 적용합니다.
+    밝고 화사한 라이트 글래스모피즘 테마 및 배경 이미지를 적용합니다.
     """
     bg_base64 = get_background_base64()
     bg_style = ""
@@ -33,14 +32,14 @@ def apply_custom_theme():
             background-attachment: fixed !important;
         }}
         [data-testid="stHeader"] {{
-            background-color: rgba(15, 23, 42, 0.75) !important;
-            backdrop-filter: blur(12px) !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+            background-color: rgba(255, 255, 255, 0.82) !important;
+            backdrop-filter: blur(14px) !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
         }}
         [data-testid="stSidebar"] {{
-            background-color: rgba(15, 23, 42, 0.75) !important;
-            backdrop-filter: blur(12px) !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+            background-color: rgba(255, 255, 255, 0.88) !important;
+            backdrop-filter: blur(14px) !important;
+            border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
         }}
         """
 
@@ -56,18 +55,29 @@ def apply_custom_theme():
         {bg_style}
 
         .block-container {{
-            padding-top: 2rem !important;
+            padding-top: 1.8rem !important;
             padding-bottom: 2rem !important;
-            max-width: 1000px;
+            max-width: 1060px;
         }}
 
-        /* 컨테이너 및 카드 글래스 반투명 (배경 투과) */
+        /* 컨테이너 및 폼 라이트 글래스 반투명 효과 */
         div[data-testid="stVerticalBlockBorderWrapper"],
+        div[data-testid="stForm"] {{
+            background: rgba(255, 255, 255, 0.82) !important;
+            backdrop-filter: blur(12px) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            border-radius: 14px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+        }}
+
+        /* 채팅 메시지 버블 라이트 모드 최적화 */
         .stChatMessage {{
-            background: rgba(15, 23, 42, 0.6) !important;
+            background: rgba(255, 255, 255, 0.9) !important;
             backdrop-filter: blur(10px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            border: 1px solid rgba(0, 0, 0, 0.07) !important;
             border-radius: 12px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+            margin-bottom: 8px !important;
         }}
 
         .stButton > button {{
