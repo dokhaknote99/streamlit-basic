@@ -10,12 +10,14 @@ from components.media import show_media_tab
 from components.layouts import show_layouts_tab
 from components.chat import show_chat_tab
 from components.status import show_status_tab
+from utils.ui_theme import apply_custom_theme
 
 st.set_page_config(
     page_title="Streamlit 공식 문서 Page Elements 종합 쇼케이스",
     page_icon="🚀",
     layout="wide",
 )
+apply_custom_theme()
 
 st.title("🚀 Streamlit 공식 API: Page Elements 종합 쇼케이스")
 st.caption("공식 문서의 Page Elements 카테고리별로 구성된 탭을 클릭하여 Streamlit의 모든 시각적 요소와 옵션들을 체험해보세요.")
