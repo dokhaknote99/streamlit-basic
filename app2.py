@@ -12,8 +12,8 @@ st.set_page_config(
 )
 apply_custom_theme()
 
-# 네비게이션 로고 이미지 등록
-st.logo("assets/logo.jpg", icon_image="assets/logo.jpg")
+# 네비게이션 로고 이미지 등록 (상단: logo.jpg, 사이드바: sidebar_banner.jpg)
+st.logo("assets/sidebar_banner.jpg", icon_image="assets/logo.jpg")
 
 # 2. 로그인 여부 확인 및 상단 네비게이션 구성
 user_id = st.session_state.get("user_id")
