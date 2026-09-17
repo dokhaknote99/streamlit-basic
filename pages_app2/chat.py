@@ -9,19 +9,27 @@ from utils.db import (
     delete_session,
     clear_user_history,
 )
-from utils.ui_theme import apply_custom_theme
+from utils.ui_theme import apply_custom_theme, page_header, empty_state, session_labels
 
 apply_custom_theme()
+
+ASSISTANT_AVATAR = "assets/logo.jpg"
 
 user_id = st.session_state.get("user_id", "guest")
 api_key = st.session_state.get("openai_api_key", "")
 
 # 1. API Key 등록 검증
 if not api_key:
-    st.title("💬 채팅")
-    st.warning("OpenAI API Key가 등록되지 않았습니다.")
-    if st.button("🔑 API Key 등록하러 가기", type="primary"):
-        st.switch_page("pages_app2/key_settings.py")
+    page_header("💬", "채팅", "대화를 시작하려면 먼저 OpenAI API Key를 등록해주세요.")
+    _, col_center, _ = st.columns([1, 1.3, 1])
+    with col_center:
+        with st.container(border=True, key="card_no_key"):
+            empty_state(
+                "API Key가 아직 없어요",
+                "OpenAI API Key를 등록하면 바로 대화를 시작할 수 있습니다. 키는 브라우저 세션에만 보관됩니다.",
+            )
+            if st.button("🔑 API Key 등록하러 가기", type="primary", width="stretch"):
+                st.switch_page("pages_app2/key_settings.py")
     st.stop()
 
 # 2. 세션 초기화
@@ -40,9 +48,7 @@ current_title = current_session_info[1] if current_session_info else "대화"
 
 # 3. 사이드바: 채팅 전용 옵션
 with st.sidebar:
-    st.subheader("💬 채팅 옵션")
-
-    if st.button("➕ 새 대화 시작", use_container_width=True, type="primary"):
+    if st.button("새 대화", icon=":material/add:", width="stretch", type="primary"):
         new_sid = create_session(user_id, "새 대화")
         st.session_state.current_session_id = new_sid
         st.rerun()
@@ -55,69 +61,81 @@ with st.sidebar:
         "gpt-5.5",
         "gpt-6-astra",
     ]
-    selected_model = st.selectbox("언어 모델 선택", options=model_options, index=0)
+    selected_model = st.selectbox("모델", options=model_options, index=0)
 
     st.divider()
 
-    # 대화 세션 목록
+    # 대화 세션 목록 (리스트 형태로 스타일링된 라디오)
     if user_sessions:
+        st.caption("대화 목록")
         session_ids = [s[0] for s in user_sessions]
-        session_labels = {s[0]: s[1] for s in user_sessions}
-        curr_idx = session_ids.index(current_sid) if current_sid in session_ids else 0
+        label_map = session_labels(user_sessions)
 
-        chosen_session = st.selectbox(
+        def _on_pick_session():
+            st.session_state.current_session_id = st.session_state["session_list_chat"]
+
+        # 새 대화/삭제 등으로 현재 세션이 바뀐 경우 위젯 선택값을 동기화
+        if st.session_state.get("session_list_chat") != current_sid:
+            st.session_state["session_list_chat"] = current_sid
+
+        st.radio(
             "대화 세션 선택",
             options=session_ids,
-            index=curr_idx,
-            format_func=lambda sid: session_labels[sid],
+            format_func=lambda sid: label_map[sid],
+            label_visibility="collapsed",
+            width="stretch",
+            key="session_list_chat",
+            on_change=_on_pick_session,
         )
-        if chosen_session != current_sid:
-            st.session_state.current_session_id = chosen_session
-            st.rerun()
 
     st.divider()
 
-    if st.button("현재 대화 삭제", use_container_width=True):
-        delete_session(current_sid)
-        st.session_state.pop("current_session_id", None)
-        st.rerun()
+    with st.expander("대화 관리", icon=":material/settings:"):
+        if st.button("현재 대화 삭제", icon=":material/delete:", width="stretch"):
+            delete_session(current_sid)
+            st.session_state.pop("current_session_id", None)
+            st.rerun()
 
-    if st.button("모든 대화 초기화", use_container_width=True):
-        clear_user_history(user_id)
-        new_sid = create_session(user_id, "새 대화")
-        st.session_state.current_session_id = new_sid
-        st.rerun()
+        if st.button("모든 대화 초기화", icon=":material/delete_sweep:", width="stretch"):
+            clear_user_history(user_id)
+            new_sid = create_session(user_id, "새 대화")
+            st.session_state.current_session_id = new_sid
+            st.rerun()
 
 # 4. 상단 헤더
-col_head, col_meta = st.columns([3, 1])
-with col_head:
-    st.title(f"💬 {current_title}")
-with col_meta:
-    st.caption(f"적용 모델: **{selected_model}**")
+current_messages = load_session_messages(current_sid)
+page_header(
+    "💬",
+    current_title,
+    chips=[(selected_model, ""), (f"메시지 {len(current_messages)}개", "gray")],
+)
 
 # 5. 스크롤 가능한 전용 채팅 뷰포트 컨테이너 (고정 높이로 안정적인 레이아웃)
-current_messages = load_session_messages(current_sid)
-chat_container = st.container(height=520, border=True)
+chat_container = st.container(height=540, border=True, key="card_chat")
 
 with chat_container:
     if len(current_messages) == 0:
-        st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
-        _, empty_col, _ = st.columns([1, 1.2, 1])
-        with empty_col:
-            st.image("assets/logo.jpg", width=72)
-            st.subheader("새로운 대화를 시작해보세요!")
-            st.caption("궁금한 점이나 작성할 코드, 아이디어를 아래 입력창에 입력해주세요.")
+        # 첫 메시지 전송 시 비울 수 있도록 placeholder에 렌더링
+        empty_slot = st.empty()
+        with empty_slot.container():
+            empty_state(
+                "새로운 대화를 시작해보세요!",
+                "궁금한 점, 작성할 코드, 떠오른 아이디어를 아래 입력창에 적어주세요.",
+            )
     else:
         for msg in current_messages:
-            with st.chat_message(msg["role"]):
+            avatar = ASSISTANT_AVATAR if msg["role"] == "assistant" else None
+            with st.chat_message(msg["role"], avatar=avatar):
                 st.write(msg["content"])
 
 # 6. 채팅창 바로 아래 전용 입력창 도킹
 user_prompt = st.chat_input("메시지를 입력하세요... (Enter 키로 전송)")
 
 if user_prompt:
-    if len(current_messages) == 0 and current_title == "새 대화":
-        update_session_title(current_sid, user_prompt)
+    if len(current_messages) == 0:
+        empty_slot.empty()
+        if current_title == "새 대화":
+            update_session_title(current_sid, user_prompt)
 
     save_message(current_sid, "user", user_prompt)
 
@@ -136,7 +154,7 @@ if user_prompt:
     )
 
     with chat_container:
-        with st.chat_message("assistant"):
+        with st.chat_message("assistant", avatar=ASSISTANT_AVATAR):
             response_text = st.write_stream(stream)
 
     save_message(current_sid, "assistant", response_text)

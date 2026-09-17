@@ -47,7 +47,7 @@ def get_user_sessions(user_id):
         LEFT JOIN messages m ON s.id = m.session_id
         WHERE s.user_id = ?
         GROUP BY s.id
-        ORDER BY s.created_at DESC
+        ORDER BY s.created_at DESC, s.id DESC
         """,
         (user_id,),
     )

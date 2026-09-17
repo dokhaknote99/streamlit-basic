@@ -2,5 +2,20 @@
 base = "light"
 primaryColor = "#4f46e5"
 backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f8fafc"
+secondaryBackgroundColor = "#f4f6fb"
 textColor = "#0f172a"
+linkColor = "#4f46e5"
+borderColor = "#e2e8f0"
+baseRadius = "0.85rem"
+buttonRadius = "0.65rem"
+font = "Pretendard, sans-serif"
+headingFont = "Pretendard, sans-serif"
+headingFontSizes = ["1.85rem", "1.45rem", "1.2rem", "1.05rem", "0.95rem", "0.875rem"]
+headingFontWeights = [700, 700, 700, 600, 600, 600]
+codeBackgroundColor = "#f1f5f9"
+showWidgetBorder = true
+
+[theme.sidebar]
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f4f6fb"
+borderColor = "#e8ecf3"
