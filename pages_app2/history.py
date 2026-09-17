@@ -1,46 +1,18 @@
-import sqlite3
 import pandas as pd
 import streamlit as st
+from utils.db import (
+    get_user_sessions,
+    load_session_messages,
+    delete_session,
+)
+
+user_id = st.session_state.get("user_id", "guest")
 
 st.title("📜 과거 채팅 내역 뷰어")
-st.caption("SQLite(chat_history.db)에 저장된 대화 세션과 메시지 기록을 조회하고 관리합니다.")
+st.caption(f"**{user_id}** 님의 대화 세션 기록을 조회하고 관리합니다. (최대 10개 보관, 세션당 최대 100회)")
 
-DB_FILE = "chat_history.db"
-
-# 1. SQLite DB 조회 및 삭제 함수
-def get_sessions():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT s.id, s.title, s.created_at, COUNT(m.id) as msg_count
-        FROM sessions s
-        LEFT JOIN messages m ON s.id = m.session_id
-        GROUP BY s.id
-        ORDER BY s.created_at DESC
-    """)
-    rows = cursor.fetchall()
-    conn.close()
-    return rows
-
-def get_session_messages(session_id):
-    conn = sqlite3.connect(DB_FILE)
-    df = pd.read_sql_query(
-        "SELECT id, role, content, file_name, created_at FROM messages WHERE session_id = ? ORDER BY id ASC",
-        conn,
-        params=(session_id,),
-    )
-    conn.close()
-    return df
-
-def delete_session(session_id):
-    conn = sqlite3.connect(DB_FILE)
-    conn.execute("DELETE FROM messages WHERE session_id = ?", (session_id,))
-    conn.execute("DELETE FROM sessions WHERE id = ?", (session_id,))
-    conn.commit()
-    conn.close()
-
-# 2. 사이드바: 대화 세션 목록 및 검색
-sessions = get_sessions()
+# 1. 사용자의 대화 세션 목록 조회
+sessions = get_user_sessions(user_id)
 
 with st.sidebar:
     st.header("🗂️ 대화 세션 목록")
@@ -71,9 +43,10 @@ with st.sidebar:
         delete_session(selected_sid)
         st.rerun()
 
-# 3. 메인 화면: 선택된 대화 세션 상세 표시
+# 2. 선택된 대화 세션 상세 정보 및 메시지
 selected_session_info = next((s for s in sessions if s[0] == selected_sid), None)
-df_msgs = get_session_messages(selected_sid)
+msgs = load_session_messages(selected_sid)
+df_msgs = pd.DataFrame(msgs)
 
 # 상단 요약 지표 카드
 m_col1, m_col2, m_col3 = st.columns(3)
@@ -95,8 +68,6 @@ with tab_chat:
     else:
         for _, row in df_msgs.iterrows():
             with st.chat_message(row["role"]):
-                if row["file_name"]:
-                    st.caption(f"📎 첨부파일: {row['file_name']}")
                 st.write(row["content"])
                 st.caption(f"🕒 {row['created_at']}")
 
@@ -110,13 +81,14 @@ with tab_chat:
         )
 
 with tab_table:
-    st.dataframe(df_msgs, width="stretch")
-
-    # CSV 파일 다운로드
-    csv_data = df_msgs.to_csv(index=False).encode("utf-8-sig")
-    st.download_button(
-        label="📥 CSV 파일로 다운로드 (.csv)",
-        data=csv_data,
-        file_name=f"{selected_session_info[1]}_대화기록.csv",
-        mime="text/csv",
-    )
+    if not df_msgs.empty:
+        st.dataframe(df_msgs, width="stretch")
+        csv_data = df_msgs.to_csv(index=False).encode("utf-8-sig")
+        st.download_button(
+            label="📥 CSV 파일로 다운로드 (.csv)",
+            data=csv_data,
+            file_name=f"{selected_session_info[1]}_대화기록.csv",
+            mime="text/csv",
+        )
+    else:
+        st.info("테이블로 표시할 메시지가 없습니다.")
