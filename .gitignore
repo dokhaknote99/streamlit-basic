@@ -2,4 +2,7 @@
 __pycache__/
 *.db
 .venv/
+.streamlit/secrets.toml
+.streamlit/*.json
+.claude/
 
